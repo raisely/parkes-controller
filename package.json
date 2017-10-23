@@ -1,0 +1,44 @@
+{
+  "name": "rest-up",
+  "version": "0.1.0",
+  "description": "Library for fast REST API generation in koa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agency/restup.git"
+  },
+  "keywords": [
+    "rest",
+    "web",
+    "http",
+    "middleware",
+    "framework"
+  ],
+  "author": "",
+  "license": "None",
+  "bugs": {
+    "url": "https://github.com/agency/restup/issues"
+  },
+  "homepage": "https://github.com/agency/restup#readme",
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "chai": "^4.1.2",
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.4.0",
+    "mocha": "^4.0.1",
+    "sinon": "^4.0.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "qs": "^6.5.1"
+  }
+}
