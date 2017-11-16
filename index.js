@@ -1,3 +1,1 @@
-const restUp = require('./lib/restUp');
-
-module.exports = restUp;
+module.exports = require('./lib/parkesController');

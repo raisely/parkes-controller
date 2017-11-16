@@ -1,10 +1,10 @@
 {
-  "name": "rest-up",
+  "name": "parkes-controller",
   "version": "0.1.0",
   "description": "Library for fast REST API generation in koa",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -w spec"
   },
   "engines": {
     "node": ">=7.6.0"
@@ -21,7 +21,7 @@
     "framework"
   ],
   "author": "",
-  "license": "None",
+  "license": "KWPL",
   "bugs": {
     "url": "https://github.com/agency/restup/issues"
   },
@@ -35,10 +35,13 @@
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.4.0",
     "mocha": "^4.0.1",
-    "sinon": "^4.0.1"
+    "sinon": "^4.1.2"
   },
   "dependencies": {
     "lodash": "^4.17.4",
+    "parkes-rest-error": "file:../parkes-rest-error",
+    "parkes-router": "file:../parkes-router",
+    "pluralize": "^7.0.0",
     "qs": "^6.5.1"
   }
 }
