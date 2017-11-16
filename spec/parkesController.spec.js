@@ -2,6 +2,10 @@ const sinon = require('sinon');
 const MockModel = require('./util/mockModel');
 const ParkesController = require('../index.js');
 const chai = require('chai');
+const sinonChai = require('sinon-chai');
+
+chai.use(sinonChai);
+
 const { mockKoaContext } = require('./util/mockKoa');
 
 const { expect } = chai;
@@ -23,6 +27,36 @@ describe('restController', () => {
 	let ctx;
 	let authorize;
 
+	function basicRequest(action) {
+		before(async () => {
+			ctx = mockKoaContext();
+			await userController[action](ctx, noop);
+		});
+	}
+
+	function itAuthorizesAgainstModel(action) {
+		it('calls authorize', async () => {
+			expect(authSpy.getCall(0).args[0]).to.eq(ctx);
+			// First call is with the class
+			expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: models.User });
+		});
+	}
+
+	function itAuthorizesAgainstRecord(action) {
+		it('calls authorize', async () => {
+			expect(authSpy).to.have.been.calledOnce();
+			expect(authSpy.getCall(0).args[0]).to.eq(ctx);
+			// First call is with the class
+			expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: dummyRecord });
+		});
+	}
+
+	function itAssignsRecordToStateData() {
+		it('assigns record to state.data', async () => {
+			expect(ctx.state.data).to.eq(dummyRecord);
+		});
+	}
+
 	before(() => {
 		models = {
 			User: MockModel('User', dummyRecord),
@@ -35,49 +69,18 @@ describe('restController', () => {
 		userController = new UserController('user', { models, authorize });
 	});
 
-	// Set the basic request context for all of them
-	['index', 'show', 'create', 'update', 'destroy'].forEach((action) => {
-		describe(action, () => {
-			before(async () => {
-				ctx = mockKoaContext();
-				await userController[action](ctx, noop);
-			});
-		});
-	});
-
-	/** Authorization */
-	['show', 'update', 'destroy'].forEach((action) => {
-		describe(action, () => {
-			it('calls authorize with context and record', async () => {
-				expect(authSpy).to.have.been.calledOnce();
-				expect(authSpy.getCall(0).args[0]).to.eq(ctx);
-				expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: dummyRecord });
-			});
-		});
-	});
-
-	['create', 'index'].forEach((action) => {
-		describe(action, () => {
-			it('calls authorize', async () => {
-				expect(authSpy).to.have.been.calledTwice();
-				expect(authSpy.getCall(0).args[0]).to.eq(ctx);
-				// First call is with the class
-				expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: models.User });
-			});
-
-			if (action === 'index') {
-				// Index calls will also authorise the individual records once loaded
-				it('calls authorize a second time with the records', () => {
-					expect(authSpy).to.have.been.calledTwice();
-					expect(authSpy.getCall(1).args[0]).to.eq(ctx);
-					expect(authSpy.getCall(1).args[1]).to.containSubset({ action, model: [dummyRecord] });
-				});
-			}
-		});
-	});
-
-	/** Record is assigned */
 	describe('index', () => {
+		basicRequest('index');
+
+		itAuthorizesAgainstModel('index');
+		it('calls authorize a second time with the records', () => {
+			expect(authSpy).to.have.been.calledTwice();
+			expect(authSpy.getCall(1).args[0]).to.eq(ctx);
+			expect(authSpy.getCall(1).args[1]).to.containSubset({
+				action: 'index', model: [dummyRecord],
+			});
+		});
+
 		it('assigns records to state.data', async () => {
 			expect(ctx.state.collection).to.eq([dummyRecord]);
 		});
@@ -87,12 +90,31 @@ describe('restController', () => {
 		});
 	});
 
-	['show', 'update'].forEach((action) => {
-		describe(action, () => {
-			it('assigns record to state.data', async () => {
-				expect(ctx.state.data).to.eq(dummyRecord);
-			});
+	describe('show', () => {
+		basicRequest('show');
+		itAuthorizesAgainstRecord('show');
+		itAssignsRecordToStateData();
+	});
+
+	describe('create', () => {
+		before(async () => {
+			ctx = mockKoaContext();
+			await userController.create(ctx, noop);
 		});
+		itAuthorizesAgainstModel();
+		itAssignsRecordToStateData();
+	});
+
+	describe('update', () => {
+		basicRequest('update');
+		itAuthorizesAgainstRecord('update');
+		itAssignsRecordToStateData();
+	});
+
+	describe('destroy', () => {
+		basicRequest('update');
+		itAuthorizesAgainstRecord('update');
+		itAssignsRecordToStateData();
 	});
 
 	// TODO honours id column
