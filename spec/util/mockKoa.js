@@ -12,6 +12,7 @@ function mockKoaContext(options) {
 				data: options.body || {},
 			},
 		},
+		href: 'http://example.com/resource',
 	});
 
 	return ctx;
