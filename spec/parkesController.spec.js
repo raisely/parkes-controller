@@ -49,19 +49,14 @@ describe('restController', () => {
 
 	function itAuthorizesAgainstModel(action) {
 		it('calls authorize', async () => {
-			expect(authSpy.getCall(0).args[0]).to.eq(ctx);
-			// First call is with the class
-			expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: models.User });
+			expect(authSpy).to.have.been.calledWith(ctx, sinon.match({ action, model: models.User }));
 		});
 	}
 
 	function itAuthorizesAgainstRecord(action) {
 		it('calls authorize', async () => {
 			// eslint-disable-next-line no-unused-expressions
-			expect(authSpy).to.have.been.calledOnce;
-			expect(authSpy.getCall(0).args[0]).to.eq(ctx);
-			// First call is with the class
-			expect(authSpy.getCall(0).args[1]).to.containSubset({ action, model: dummyRecord });
+			expect(authSpy).to.have.been.calledWith(ctx, sinon.match({ action, model: dummyRecord }));
 		});
 	}
 
@@ -98,11 +93,9 @@ describe('restController', () => {
 
 		itAuthorizesAgainstModel('index');
 		it('calls authorize a second time with the records', () => {
-			expect(authSpy).to.have.been.calledTwice();
-			expect(authSpy.getCall(1).args[0]).to.eq(ctx);
-			expect(authSpy.getCall(1).args[1]).to.containSubset({
+			expect(authSpy).to.have.been.calledWith(ctx, sinon.match({
 				action: 'index', model: [dummyRecord],
-			});
+			}));
 		});
 
 		it('assigns records to state.data', async () => {
