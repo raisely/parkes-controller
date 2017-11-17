@@ -50,10 +50,6 @@ describe('ParkesController', () => {
 		setupHookSpies();
 	});
 
-	after(() => {
-		sandbox.reset();
-	});
-
 	describe('index', () => {
 		basicRequest('index');
 
@@ -71,22 +67,22 @@ describe('ParkesController', () => {
 		it('assigns pagination to state.data.pagination', async () => {
 			expect(ctx.state.data.pagination).to.containSubset({ pages: 1, total: 1 });
 		});
-		itCallsBeforeAndAfterHooks('index', { after: [dummyRecord] });
+		itCallsBeforeAndAfterHooks('index', { after: [[dummyRecord]] });
 	});
 
 	describe('show', () => {
 		basicRequest('show');
 		itAuthorizesAgainstRecord('show');
 		itAssignsRecordToStateData();
-		itCallsBeforeAndAfterHooks('show', { after: dummyRecord });
+		itCallsBeforeAndAfterHooks('show', { after: [dummyRecord] });
 	});
 
 	describe('create', () => {
 		context('When request is simple and correct', () => {
 			basicRequest('create', dummyPost);
-			itAuthorizesAgainstModel();
+			itAuthorizesAgainstModel('create');
 			itAssignsRecordToStateData();
-			itCallsBeforeAndAfterHooks('create', { before: dummyPost, after: dummyRecord });
+			itCallsBeforeAndAfterHooks('create', { before: [dummyPost], after: [dummyRecord] });
 		});
 
 		context('When request tries to update restricted keys', () => {
@@ -99,7 +95,7 @@ describe('ParkesController', () => {
 			basicRequest('update', dummyPost);
 			itAuthorizesAgainstRecord('update');
 			itAssignsRecordToStateData();
-			itCallsBeforeAndAfterHooks('update', { before: dummyPost, after: dummyRecord });
+			itCallsBeforeAndAfterHooks('update', { before: [dummyRecord, dummyPost], after: [dummyRecord] });
 		});
 
 		context('When request tries to update restricted keys', () => {
@@ -111,7 +107,7 @@ describe('ParkesController', () => {
 		basicRequest('destroy');
 		itAuthorizesAgainstRecord('destroy');
 		itAssignsRecordToStateData();
-		itCallsBeforeAndAfterHooks('destroy', { before: dummyRecord, after: dummyRecord });
+		itCallsBeforeAndAfterHooks('destroy', { before: [dummyRecord], after: [dummyRecord] });
 	});
 
 	// TODO honours id column
@@ -122,6 +118,10 @@ describe('ParkesController', () => {
 		before(async () => {
 			ctx = mockKoaContext({ body });
 			await userController[action](ctx, noop);
+		});
+
+		after(() => {
+			sandbox.reset();
 		});
 	}
 
@@ -162,7 +162,11 @@ describe('ParkesController', () => {
 
 			it(`calls ${hook}`, () => {
 				const params = [ctx];
-				if (payload[when]) params.push(payload[when]);
+				if (payload[when]) {
+					payload[when].forEach((param) => {
+						params.push(sinon.match(param));
+					});
+				}
 				expect(hookSpies[hook]).to.have.been.calledWith(...params);
 			});
 		});
