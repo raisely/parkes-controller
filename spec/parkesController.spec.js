@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const sinon = require('sinon');
 const MockModel = require('./util/mockModel');
 const ParkesController = require('../index.js');
@@ -29,21 +30,98 @@ function authorize(...param) {
 	authObj.authorize(...param);
 }
 
+const allActions = ['index', 'show', 'create', 'update', 'destroy'];
+
 class UserController extends ParkesController {}
 
-describe('restController', () => {
+describe('ParkesController', () => {
 	let userController;
 	let models;
 	let authSpy;
 	let ctx;
+	const hookSpies = {};
+
+	before(() => {
+		models = {
+			User: MockModel('User', dummyRecord),
+		};
+		authSpy = sandbox.spy(authObj, 'authorize');
+		userController = new UserController('user', { models, authorize });
+		setupHookSpies();
+	});
+
+	after(() => {
+		sandbox.reset();
+	});
+
+	describe('index', () => {
+		basicRequest('index');
+
+		itAuthorizesAgainstModel('index');
+		it('calls authorize a second time with the records', () => {
+			expect(authSpy).to.have.been.calledWith(ctx, sinon.match({
+				action: 'index', model: [dummyRecord],
+			}));
+		});
+
+		it('assigns records to state.data', async () => {
+			expect(ctx.state.collection).to.eq([dummyRecord]);
+		});
+
+		it('assigns pagination to state.pagination', async () => {
+			expect(ctx.state.pagination).to.eq({ page: 1 });
+		});
+		itCallsBeforeAndAfterHooks('index', { after: [dummyRecord] });
+	});
+
+	describe('show', () => {
+		basicRequest('show');
+		itAuthorizesAgainstRecord('show');
+		itAssignsRecordToStateData();
+		itCallsBeforeAndAfterHooks('show', { after: dummyRecord });
+	});
+
+	describe('create', () => {
+		context('When request is simple and correct', () => {
+			basicRequest('create', dummyPost);
+			itAuthorizesAgainstModel();
+			itAssignsRecordToStateData();
+			itCallsBeforeAndAfterHooks('create', { before: dummyPost, after: dummyRecord });
+		});
+
+		context('When request tries to update restricted keys', () => {
+			itRejectsRestrictedKeys('create');
+		});
+	});
+
+	describe('update', () => {
+		context('When request is simple and correct', () => {
+			basicRequest('update', dummyPost);
+			itAuthorizesAgainstRecord('update');
+			itAssignsRecordToStateData();
+			itCallsBeforeAndAfterHooks('update', { before: dummyPost, after: dummyRecord });
+		});
+
+		context('When request tries to update restricted keys', () => {
+			itRejectsRestrictedKeys('update');
+		});
+	});
+
+	describe('destroy', () => {
+		basicRequest('destroy');
+		itAuthorizesAgainstRecord('destroy');
+		itAssignsRecordToStateData();
+		itCallsBeforeAndAfterHooks('destroy', { before: dummyRecord, after: dummyRecord });
+	});
+
+	// TODO honours id column
+	// TODO passes scoping into authorisation
+
 
 	function basicRequest(action, body) {
 		before(async () => {
 			ctx = mockKoaContext({ body });
 			await userController[action](ctx, noop);
-		});
-		after(() => {
-			sandbox.reset();
 		});
 	}
 
@@ -78,71 +156,25 @@ describe('restController', () => {
 		});
 	}
 
-	before(() => {
-		models = {
-			User: MockModel('User', dummyRecord),
-		};
+	function itCallsBeforeAndAfterHooks(action, payload) {
+		['before', 'after'].forEach((when) => {
+			const hook = when + _.capitalize(action);
 
-		authSpy = sandbox.spy(authObj, 'authorize');
-
-		userController = new UserController('user', { models, authorize });
-	});
-
-	describe('index', () => {
-		basicRequest('index');
-
-		itAuthorizesAgainstModel('index');
-		it('calls authorize a second time with the records', () => {
-			expect(authSpy).to.have.been.calledWith(ctx, sinon.match({
-				action: 'index', model: [dummyRecord],
-			}));
+			it(`calls ${hook}`, () => {
+				const params = [ctx];
+				if (payload[when]) params.push(payload[when]);
+				expect(hookSpies[hook]).to.have.been.calledWith(...params);
+			});
 		});
+	}
 
-		it('assigns records to state.data', async () => {
-			expect(ctx.state.collection).to.eq([dummyRecord]);
+	function setupHookSpies() {
+		['before', 'after'].forEach((time) => {
+			allActions.forEach((action) => {
+				const hook = time + _.capitalize(action);
+				userController[hook] = noop;
+				hookSpies[hook] = sandbox.spy(userController, hook);
+			});
 		});
-
-		it('assigns pagination to state.pagination', async () => {
-			expect(ctx.state.pagination).to.eq({ page: 1 });
-		});
-	});
-
-	describe('show', () => {
-		basicRequest('show');
-		itAuthorizesAgainstRecord('show');
-		itAssignsRecordToStateData();
-	});
-
-	describe('create', () => {
-		context('When request is simple and correct', () => {
-			basicRequest('create', dummyPost);
-			itAuthorizesAgainstModel();
-			itAssignsRecordToStateData();
-		});
-
-		context('When request tries to update restricted keys', () => {
-			itRejectsRestrictedKeys('create');
-		});
-	});
-
-	describe('update', () => {
-		context('When request is simple and correct', () => {
-			basicRequest('update', dummyPost);
-			itAuthorizesAgainstRecord('update');
-			itAssignsRecordToStateData();
-		});
-
-		context('When request tries to update restricted keys', () => {
-			itRejectsRestrictedKeys('update');
-		});
-	});
-
-	describe('destroy', () => {
-		basicRequest('destroy');
-		itAuthorizesAgainstRecord('destroy');
-		itAssignsRecordToStateData();
-	});
-
-	// TODO honours id column
-	// TODO passes scoping into authorisation
+	}
 });
