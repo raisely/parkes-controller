@@ -64,12 +64,12 @@ describe('ParkesController', () => {
 			}));
 		});
 
-		it('assigns records to state.data', async () => {
-			expect(ctx.state.collection).to.eq([dummyRecord]);
+		it('assigns records to state.data.collection', async () => {
+			expect(ctx.state.data.collection).to.containSubset([dummyRecord]);
 		});
 
-		it('assigns pagination to state.pagination', async () => {
-			expect(ctx.state.pagination).to.eq({ page: 1 });
+		it('assigns pagination to state.data.pagination', async () => {
+			expect(ctx.state.data.pagination).to.containSubset({ pages: 1, total: 1 });
 		});
 		itCallsBeforeAndAfterHooks('index', { after: [dummyRecord] });
 	});
