@@ -1,4 +1,5 @@
-async function noop() {};
+// eslint-disable-next-line no-empty-function
+async function noop() {}
 
 function MockModel(name, dummyRecord) {
 	const mock = {
