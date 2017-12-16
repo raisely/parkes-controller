@@ -45,6 +45,7 @@
     "parkes-rest-error": "file:../parkes-rest-error",
     "parkes-router": "file:../parkes-router",
     "pluralize": "^7.0.0",
-    "qs": "^6.5.1"
+    "qs": "^6.5.1",
+    "sequelize": "^4.28.3"
   }
 }
