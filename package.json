@@ -36,7 +36,10 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.4.0",
+    "koa": "^2.4.1",
+    "koa-bodyparser": "^4.2.0",
     "mocha": "^4.0.1",
+    "parkes-api-test": "file:../parkes-api-test",
     "sinon": "^4.1.2",
     "sinon-chai": "^2.14.0"
   },
@@ -46,6 +49,6 @@
     "parkes-router": "file:../parkes-router",
     "pluralize": "^7.0.0",
     "qs": "^6.5.1",
-    "sequelize": "^4.28.3"
+    "sequelize": "^4.28.5"
   }
 }

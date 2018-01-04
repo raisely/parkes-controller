@@ -6,14 +6,14 @@ function mockKoaContext(options) {
 	const ctx = _.defaults(options, {
 		query: {},
 		params: {},
-		state: {},
-		request: {
-			body: {
-				data: options.body || {},
-			},
-		},
-		href: 'http://example.com/resource',
+		request: {},
 	});
+
+	delete ctx.body;
+
+	if (options.body) {
+		ctx.request.body = { data: options.body };
+	}
 
 	return ctx;
 }
