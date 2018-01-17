@@ -31,8 +31,8 @@ class UserController extends ParkesController {
       // do something cool during the request...
   }
 
-  async beforeCreate(ctx, model) {
-    // do something else cool during the request...
+  async beforeCreate(ctx, newRecord) {
+    // Validate values in newRecord
   }
 }
 
@@ -89,7 +89,7 @@ controller = new MyController('user', options);
 
 ### Name `String`
 
-The resource name for the controller (is pluralized by ParkesRouter)
+The resource name for the controller
 
 ### Options `Object`
 
@@ -98,7 +98,7 @@ Is an object with the following keys:
 Option           | Default    | Description
 ---------------- | ---------- | ---------------------------------------------------------------------------------------------------
 models           | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
-authorize        | false      | A CanCan style authorize function if you want to authorize your calls
+authorize        | undefined  | A hook to authorize api calls
 resourceIdColumn | 'uuid'     | Name of the column to be used for a resource id by the api
 
 ## Hooks
@@ -135,17 +135,32 @@ function(ctx, { model, parent, scopes, isPrivate })
 
 Paramters | Type                        | Description
 --------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-context   |                             | Context of the Koa request
-model     | Sequelize class or instance | The model that the request is accessing, usually the record that is being viewed/updated/deleted. For create this will be the class of the object to be created
+ctx       |                             | Context of the Koa request
+model     | Sequelize class or instance | The model that the request is accessing, usually the record that is being viewed/updated/deleted. For create this will be the class of the object to be created. See below for index
 parent    | Sequelize instance          | In the case of create it's often necessary to know the record that the object will be a child of before creating the record (eg a user can only add an item to their shop )
 scopes    | String[]                    | Records that a findAll request is being scoped by
 isPrivate | boolean                     | true if the request query contains ?private=1
 
+In the case of index, `authorize` is called twice, the first time model will be the class to
+be indexed, allowing you to prevent fetching large arrays from the DB if the user has no
+access to that model. Once the records are retrieved, model will contain the array of
+sequelize records.
+
+## ParkesController and RestHandler
+ParkesController delegates the bulk of the work to RestHandler which handles generating
+and executing sequelize queries.
+This allows the controller methods to remain fairly lean - generally they're of the
+form findRecord, authorize, beforeHook, update, afterHook.
+If you need more customisation of an action than the hooks can provide, then you can
+override the controller method and still make use of this.rest to delegate to the
+RestHandler.
+
 ## Event emitters
 
-On each ParkesController instance, an `EventEmitter` object property exists allowing
-developers to hook non-blocking events inside of the constructor. The names and
-Parameters of the events directly correspond with each `Hook` listed above.
+The RestHandler provides the EventEmitter interface, `EventEmitter` allowing
+you to hook non-blocking events in the request. The names and
+parameters of the events are the same as the hooks (above), but do not block
+the completion of the request (and so cannot be used to modify the HTTP response).
 
 ```javascript
 class MyController extends ParkesController {
@@ -160,5 +175,5 @@ class MyController extends ParkesController {
 ```
 
  > _Please not that unlike `async` hooks, the event emitters should not be used to
-modify requests or models. This is due to the event before forced to run after
-it's parent call has completed._
+modify requests or models. As EventEmitter events will not be synchronous with the
+HTTP request._
