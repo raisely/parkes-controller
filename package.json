@@ -4,7 +4,8 @@
   "description": "Library for fast REST API generation in koa",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -w spec"
+    "test": "mocha -w spec",
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=7.6.0"
