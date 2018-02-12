@@ -92,7 +92,6 @@ Option           | Default    | Description
 ---------------- | ---------- | ---------------------------------------------------------------------------------------------------
 models           | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
 authorize        | undefined  | A hook to authorize api calls
-enableAsyncAuth  | false      | Enables or disables asynchronous callbacks for authentication
 resourceIdColumn | 'uuid'     | Name of the column to be used for a resource id by the api
 
 ## Hooks
