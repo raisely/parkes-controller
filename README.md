@@ -88,11 +88,12 @@ The resource name for the controller
 
 Is an object with the following keys:
 
-Option           | Default    | Description
----------------- | ---------- | ---------------------------------------------------------------------------------------------------
-models           | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
-authorize        | undefined  | A hook to authorize api calls
-resourceIdColumn | 'uuid'     | Name of the column to be used for a resource id by the api
+Option             | Default    | Description
+------------------ | ---------- | ---------------------------------------------------------------------------------------------------
+models             | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
+authorize          | undefined  | A hook to authorize api calls
+resourceIdColumn   | 'uuid'     | Name of the column to be used for a resource id by the api
+authorizationScope | undefined  | Callback function for binding dynamic model associations by the `ctx.state.user` value
 
 ## Hooks
 
