@@ -1,10 +1,11 @@
 # Parkes Controller
 
-A framework for quickly setting up **REST**ful and **CRUD** compliant APIs.
+A framework for quickly setting up **REST**ful and **CRUD** compliant APIs for sequelize models.
 
 ## Dependencies
 
 Parkes Controller is built for [koa 2](https://github.com/koajs/koa) and requires async/await in node 7.6
+Parkes Controller interfaces to Sequelize Models.
 
 # Getting Started
 
@@ -18,7 +19,7 @@ const User = sequelize.define('User', ...); // define the sequalize resouce
 // declare the controller model
 class UserController extends ParkesController {
 
-  // define custom handles for CRUD requests...
+  // define custom handlers for CRUD requests...
   show(ctx, next) {
     super(context);
     console.log('Retrieved user resource: ', ctx.state.data)
@@ -82,24 +83,33 @@ controller = new MyController('user', options);
 
 ### Name `String`
 
-The resource name for the controller
+The name of the model for the controller to create an API for
 
 ### Options `Object`
 
-Is an object with the following keys:
+Is an object with options for ParkesController which is also passed to RestHandler
 
 Option             | Default    | Description
 ------------------ | ---------- | ---------------------------------------------------------------------------------------------------
-models             | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
-authorize          | undefined  | A hook to authorize api calls
-resourceIdColumn   | 'uuid'     | Name of the column to be used for a resource id by the api
+authorize          | undefined  | A hook to authorize api calls. The controller will throw if this is not set, set it to false if you don't want any authorization.
 authorizationScope | undefined  | Callback function for binding dynamic model associations by the `ctx.state.user` value
+models             | (required) | Object containing all of your sequelize models (they should have singular names, ie User not Users)
+resourceIdColumn   | 'uuid'     | Name of the column to be used for a resource id by the api
+include            | []         | Default includes to be used with find or findAll (can be overridden per call)
+filterAttributes   | []         | An array of attribute names that can be specified in the HTTP query that will cause a corresponding where clause in the sequelize query
+scopeModels        | []         | The presence of these keys in the query or params will filter findAll queries by joining on that model. eg You could specify ['user'] when defining the posts controller to allow API calls to request all posts by a specific user either via /users/:user/posts or /posts?user=:user
+search             | ['name']   | Array of fields to compare ?q= text against
+restricted         | ['id', 'uuid', 'password', 'permission', 'internal', 'privateKey', 'publicKey', 'userId', 'organisationId'] | Array of fields that may not be changed by create/update requests
+allowed            | []         | Allow one of the default restricted fields without redefining the rest
+defaultPageLength  | 100        | Default limit for pagination
+
 
 ## Hooks
 
 As shown in the above example, Parkes Controller allows you to bind events to before and after a primary database action occors within a request. This allows you to modify the requests before a response is generated.
 
-### Parameters
+### Hook Parameters
+
 
 `ctx` represents a Koa context object, while the second paramater represents a single Sequelize model or collection of models (unless otherwise stated).
 
@@ -118,7 +128,8 @@ async afterDestroy  | `(ctx, deadModel)`  | After a single model is destroyed (o
 
 ## Authorization
 
-A function for authorizing requests with the following signature
+A function for authorizing requests with the following signature.
+This is required. If you really don't want to authorize requests, set this to false.
 
 ```javascript
 function(ctx, { model, parent, scopes, isPrivate })
