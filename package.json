@@ -1,6 +1,6 @@
 {
   "name": "parkes-controller",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Library for fast REST API generation in koa",
   "main": "index.js",
   "scripts": {

@@ -59,7 +59,15 @@ describe('ParkesController', () => {
 			User: MockModel('User', dummyRecord),
 		};
 		authSpy = sandbox.spy(authObj, 'authorize');
-		userController = new UserController('user', { models, authorize });
+		userController = new UserController('user', {
+			attributes: {
+				include: [
+					'arbitraryAttribute',
+				],
+			},
+			models,
+			authorize,
+		});
 		setupHookSpies();
 		server = startServer(userController);
 	});
@@ -76,7 +84,7 @@ describe('ParkesController', () => {
 		{
 			note: 'index',
 			_expect: {
-				data: [dummyRecord],
+				data: [Object.assign({ arbitraryAttribute: 1 }, dummyRecord)],
 				pagination: { pages: 1, total: 1 },
 			},
 			describe: () => {
