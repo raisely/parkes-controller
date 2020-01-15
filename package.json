@@ -1,6 +1,6 @@
 {
   "name": "parkes-controller",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Library for fast REST API generation in koa",
   "main": "index.js",
   "scripts": {
@@ -40,14 +40,14 @@
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",
     "mocha": "^4.0.1",
-    "parkes-api-test": "raisely/parkes-api-test",
+    "parkes-api-test": "^0.5.0",
     "sinon": "^4.1.2",
     "sinon-chai": "^2.14.0"
   },
   "dependencies": {
     "lodash": "^4.17.4",
-    "parkes-rest-error": "raisely/parkes-rest-error",
-    "parkes-router": "raisely/parkes-router",
+    "parkes-rest-error": "^0.1.0",
+    "parkes-router": "^0.2.0",
     "pluralize": "^7.0.0",
     "qs": "^6.5.1",
     "sequelize": "^4.28.5"
