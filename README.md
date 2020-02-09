@@ -69,7 +69,7 @@ class MyController extends ParkesController {
     async afterIndex(ctx, collection) {}
 
     async beforeCreate(ctx, rawModel) {}
-    async afterCreate(ctx, newModel) {}
+    async afterCreate(ctx, newModel, rawModel) {}
 
     async beforeUpdate(ctx, oldModel) {}
     async afterUpdate(ctx, newModel) {}
@@ -121,7 +121,7 @@ async beforeIndex   | `(ctx)`             | Before a model collection is fetched
 async afterIndex    | `(ctx, collection)` | After a model collection is fetched
 async beforeCreate  | `(ctx, rawModel)`   | Before a model is added to the database (raw model)
 async afterCreate   | `(ctx, newModel)`   | After a model has been added to the database (full model)
-async beforeUpdate  | `(ctx, oldModel)`   | Before a single model is updated
+async beforeUpdate  | `(ctx, oldModel, rawModel)`   | Before a single model is updated
 async afterUpdate   | `(ctx, newModel)`   | After a single model is updated
 async beforeDestroy | `(ctx, oldModel)`   | Before a single model is destroyed (or disabled)
 async afterDestroy  | `(ctx, deadModel)`  | After a single model is destroyed (or disabled)
