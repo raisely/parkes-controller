@@ -50,6 +50,6 @@
     "parkes-router": "^0.2.0",
     "pluralize": "^7.0.0",
     "qs": "^6.5.1",
-    "sequelize": "^4.28.5"
+    "sequelize": "^5.15.1"
   }
 }
